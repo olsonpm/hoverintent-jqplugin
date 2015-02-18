@@ -1,0 +1,35 @@
+{
+  "name": "hoverintent-jqplugin",
+  "version": "0.1.0",
+  "original-version": "1.8.0",
+  "description": "The popular 'hoverintent' library now available in npm",
+  "main": "./dist/hoverintent.js",
+  "scripts": {
+    "test": "./node_modules/phantomjs/bin/phantomjs ./tests/cjs.js && ./node_modules/phantomjs/bin/phantomjs ./tests/global.js && ./node_modules/phantomjs/bin/phantomjs ./tests/amd.js",
+    "uglify": "./node_modules/uglify-js/bin/uglifyjs ./dist/hoverintent.js -o ./dist/hoverintent.min.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/olsonpm/hoverintent-jqplugin.git"
+  },
+  "keywords": [
+    "hoverintent",
+    "jquery",
+    "plugin",
+    "hover",
+    "mouseover"
+  ],
+  "author": "Phil Olson <philip.olson@protonmail.ch> (https://github.com/olsonpm)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/olsonpm/hoverintent-jqplugin/issues"
+  },
+  "homepage": "https://github.com/olsonpm/hoverintent-jqplugin",
+  "devDependencies": {
+    "chai": "^2.0.0",
+    "jquery": "^2.1.3",
+    "phantomjs": "^1.9.15",
+    "requirejs": "^2.1.16",
+    "uglify-js": "^2.4.16"
+  }
+}
