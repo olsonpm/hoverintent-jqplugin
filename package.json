@@ -1,6 +1,6 @@
 {
   "name": "hoverintent-jqplugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "original-version": "1.8.0",
   "description": "The popular 'hoverintent' library now available in npm",
   "main": "./dist/hoverintent.js",

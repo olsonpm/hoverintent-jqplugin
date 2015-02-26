@@ -144,6 +144,7 @@
 
         if (ctx && ctx.fn && ctx.fn.jquery) {
             // then ctx must be jquery
+            var $ = ctx;
             ctx.fn.hoverintent = function(over, out) {
                 $(this).each(function() {
                     hoverintent($(this)[0], over, out);
@@ -151,6 +152,7 @@
             };
         } else if (ctx && ctx.jQuery && ctx.jQuery.fn) {
             // then ctx must be the window object
+            var $ = ctx.jQuery;
             ctx.jQuery.fn.hoverintent = function(over, out) {
                 $(this).each(function() {
                     hoverintent($(this)[0], over, out);
