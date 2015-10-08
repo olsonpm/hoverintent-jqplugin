@@ -1,6 +1,6 @@
-require(['jquery', 'hoverintent'], function($, hoverintent) {
-    hoverintent($);
+require(['jquery', 'hoverIntent'], function($, hoverIntent) {
+    hoverIntent($);
     console.log(
-        ($.fn.hoverintent) ? "test=success" : "test=failed"
+        ($.fn.hoverIntent) ? "test=success" : "test=failed"
     );
 });

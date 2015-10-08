@@ -1,0 +1,44 @@
+<!doctype>
+<html>
+  <head>
+    <script src="/index.bundled.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.css" rel="stylesheet">
+    <style>
+      ul {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+      }
+
+      ul > li {
+        display: inline-block;
+      }
+
+      #demo {
+        margin-top: 100px;
+      }
+      #demo > li {
+        height: 100px;
+        width: 200px;
+        vertical-align: top;
+      }
+      #demo > li:nth-child(1) {
+        background-color: #ffa970;
+      }
+      #demo > li:nth-child(2) {
+        background-color: #70acff;
+      }
+      #demo > li:nth-child(3) {
+        background-color: #ff707e;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>CommonJS example</h1>
+    <ul id="demo">
+      <li></li><!--
+      --><li></li><!--
+      --><li></li>
+    </ul>
+  </body>
+</html>

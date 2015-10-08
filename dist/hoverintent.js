@@ -1,9 +1,34 @@
 /*!
- * hoverintent v0.1.0 (2013-05-20)
- * http://tristen.ca/hoverintent
- * Copyright (c) 2013 ; Licensed MIT
+ * hoverIntent v1.8.0 // 2014.06.29 // jQuery v1.9.1+
+ * http://cherne.net/brian/resources/jquery.hoverIntent.html
+ *
+ * You may use hoverIntent under the terms of the MIT license. Basically that
+ * means you are free to use hoverIntent as long as this header is left intact.
+ * Copyright 2007, 2014 Brian Cherne
  */
 
+/* hoverIntent is similar to jQuery's built-in "hover" method except that
+ * instead of firing the handlerIn function immediately, hoverIntent checks
+ * to see if the user's mouse has slowed down (beneath the sensitivity
+ * threshold) before firing the event. The handlerOut function is only
+ * called after a matching handlerIn.
+ *
+ * // basic usage ... just like .hover()
+ * .hoverIntent( handlerIn, handlerOut )
+ * .hoverIntent( handlerInOut )
+ *
+ * // basic usage ... with event delegation!
+ * .hoverIntent( handlerIn, handlerOut, selector )
+ * .hoverIntent( handlerInOut, selector )
+ *
+ * // using a basic configuration object
+ * .hoverIntent( config )
+ *
+ * @param  handlerIn   function OR configuration object
+ * @param  handlerOut  function OR selector for delegation OR undefined
+ * @param  selector    selector OR undefined
+ * @author Brian Cherne <brian(at)cherne(dot)net>
+ */
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
         define(factory);
@@ -13,155 +38,100 @@
         root.Requester = factory();
     }
 }(this, function() {
-    function _hoverIntent(ctx) {
-        var hoverintent = function(el, over, out) {
-            var x, y, pX, pY;
-            var h = {},
-                state = 0,
-                timer = 0;
+    return function initializeHoverIntent(ctx) {
+        var hoverIntent = function(handlerIn,handlerOut,selector) {
 
-            var options = {
-                sensitivity: 7,
+            // default configuration values
+            var cfg = {
                 interval: 100,
+                sensitivity: 6,
                 timeout: 0
             };
 
-            var defaults = function(opt) {
-                options = merge(opt || {}, options);
-            };
-
-            var merge = function(obj) {
-                for (var i = 1; i < arguments.length; i++) {
-                    var def = arguments[i];
-                    for (var n in def) {
-                        if (obj[n] === undefined) obj[n] = def[n];
-                    }
-                }
-                return obj;
-            };
-
-            // Cross browser events
-            var addEvent = function(object, event, method) {
-                if (object.attachEvent) {
-                    object['e' + event + method] = method;
-                    object[event + method] = function() {
-                        object['e' + event + method](window.event);
-                    };
-                    object.attachEvent('on' + event, object[event + method]);
-                } else {
-                    object.addEventListener(event, method, false);
-                }
-            };
-
-            var removeEvent = function(object, event, method) {
-                if (object.detachEvent) {
-                    object.detachEvent('on' + event, object[event + method]);
-                    object[event + method] = null;
-                } else {
-                    object.removeEventListener(event, method, false);
-                }
-            };
-
-            var track = function(e) {
-                x = e.clientX;
-                y = e.clientY;
-            };
-
-            var delay = function(el, outEvent, e) {
-                if (timer) timer = clearTimeout(timer);
-                state = 0;
-                return outEvent.call(el, e);
-            };
-
-            var dispatch = function(e, event, over) {
-                var tracker = function() {
-                    track(e);
-                };
-
-                if (timer) timer = clearTimeout(timer);
-                if (over) {
-                    pX = e.clientX;
-                    pY = e.clientY;
-                    addEvent(el, 'mousemove', tracker);
-
-                    if (state !== 1) {
-                        timer = setTimeout(function() {
-                            compare(el, event, e);
-                        }, options.interval);
-                    }
-                } else {
-                    removeEvent(el, 'mousemove', tracker);
-
-                    if (state === 1) {
-                        timer = setTimeout(function() {
-                            delay(el, event, e);
-                        }, options.timeout);
-                    }
-                }
-                return this;
-            };
-
-            var compare = function(el, overEvent, e) {
-                if (timer) timer = clearTimeout(timer);
-                if ((Math.abs(pX - x) + Math.abs(pY - y)) < options.sensitivity) {
-                    state = 1;
-                    return overEvent.call(el, e);
-                } else {
-                    pX = x;
-                    pY = y;
-                    timer = setTimeout(function() {
-                        compare(el, overEvent, e);
-                    }, options.interval);
-                }
-            };
-
-            // Public methods
-            h.options = function(opt) {
-                defaults(opt);
-            };
-
-            var dispatchOver = function(e) {
-                dispatch(e, over, true);
-            };
-            var dispatchOut = function(e) {
-                dispatch(e, out);
-            };
-
-            h.remove = function() {
-                if (!el) return;
-                removeEvent(el, 'mouseover', dispatchOver);
-                removeEvent(el, 'mouseout', dispatchOut);
-            };
-
-            if (el) {
-                addEvent(el, 'mouseover', dispatchOver);
-                addEvent(el, 'mouseout', dispatchOut);
+            if ( typeof handlerIn === "object" ) {
+                cfg = $.extend(cfg, handlerIn );
+            } else if ($.isFunction(handlerOut)) {
+                cfg = $.extend(cfg, { over: handlerIn, out: handlerOut, selector: selector } );
+            } else {
+                cfg = $.extend(cfg, { over: handlerIn, out: handlerIn, selector: handlerOut } );
             }
 
-            defaults();
-            return h;
+            // instantiate variables
+            // cX, cY = current X and Y position of mouse, updated by mousemove event
+            // pX, pY = previous X and Y position of mouse, set by mouseover and polling interval
+            var cX, cY, pX, pY;
+
+            // A private function for getting mouse position
+            var track = function(ev) {
+                cX = ev.pageX;
+                cY = ev.pageY;
+            };
+
+            // A private function for comparing current and previous mouse position
+            var compare = function(ev,ob) {
+                ob.hoverIntent_t = clearTimeout(ob.hoverIntent_t);
+                // compare mouse positions to see if they've crossed the threshold
+                if ( Math.sqrt( (pX-cX)*(pX-cX) + (pY-cY)*(pY-cY) ) < cfg.sensitivity ) {
+                    $(ob).off("mousemove.hoverIntent",track);
+                    // set hoverIntent state to true (so mouseOut can be called)
+                    ob.hoverIntent_s = true;
+                    return cfg.over.apply(ob,[ev]);
+                } else {
+                    // set previous coordinates for next time
+                    pX = cX; pY = cY;
+                    // use self-calling timeout, guarantees intervals are spaced out properly (avoids JavaScript timer bugs)
+                    ob.hoverIntent_t = setTimeout( function(){compare(ev, ob);} , cfg.interval );
+                }
+            };
+
+            // A private function for delaying the mouseOut function
+            var delay = function(ev,ob) {
+                ob.hoverIntent_t = clearTimeout(ob.hoverIntent_t);
+                ob.hoverIntent_s = false;
+                return cfg.out.apply(ob,[ev]);
+            };
+
+            // A private function for handling mouse 'hovering'
+            var handleHover = function(e) {
+                // copy objects to be passed into t (required for event object to be passed in IE)
+                var ev = $.extend({},e);
+                var ob = this;
+
+                // cancel hoverIntent timer if it exists
+                if (ob.hoverIntent_t) { ob.hoverIntent_t = clearTimeout(ob.hoverIntent_t); }
+
+                // if e.type === "mouseenter"
+                if (e.type === "mouseenter") {
+                    // set "previous" X and Y position based on initial entry point
+                    pX = ev.pageX; pY = ev.pageY;
+                    // update "current" X and Y position based on mousemove
+                    $(ob).on("mousemove.hoverIntent",track);
+                    // start polling interval (self-calling timeout) to compare mouse coordinates over time
+                    if (!ob.hoverIntent_s) { ob.hoverIntent_t = setTimeout( function(){compare(ev,ob);} , cfg.interval );}
+
+                    // else e.type == "mouseleave"
+                } else {
+                    // unbind expensive mousemove event
+                    $(ob).off("mousemove.hoverIntent",track);
+                    // if hoverIntent state is true, then call the mouseOut function after the specified delay
+                    if (ob.hoverIntent_s) { ob.hoverIntent_t = setTimeout( function(){delay(ev,ob);} , cfg.timeout );}
+                }
+            };
+
+            // listen for mouseenter and mouseleave
+            return this.on({'mouseenter.hoverIntent':handleHover,'mouseleave.hoverIntent':handleHover}, cfg.selector);
         };
 
         if (ctx && ctx.fn && ctx.fn.jquery) {
             // then ctx must be jquery
             var $ = ctx;
-            ctx.fn.hoverintent = function(over, out) {
-                $(this).each(function() {
-                    hoverintent($(this)[0], over, out);
-                });
-            };
+            ctx.fn.hoverIntent = hoverIntent;
         } else if (ctx && ctx.jQuery && ctx.jQuery.fn) {
             // then ctx must be the window object
             var $ = ctx.jQuery;
-            ctx.jQuery.fn.hoverintent = function(over, out) {
-                $(this).each(function() {
-                    hoverintent($(this)[0], over, out);
-                });
-            };
+            ctx.jQuery.fn.hoverIntent = hoverIntent;
         } else {
             throw new Error("Invalid Argument: Hoverintent expects either the window global with jquery, or an instance of jquery as a context");
         }
     }
-
-    return _hoverIntent;
 }));

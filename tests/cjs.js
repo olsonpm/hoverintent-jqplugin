@@ -4,8 +4,8 @@ var $ = require('jquery');
 var assert = require('chai').assert;
 
 try {
-    require('../dist/hoverintent.js')($);
-    assert.ok($.fn.hoverintent);
+    require('./hoverIntent.js')($);
+    assert.ok($.fn.hoverIntent);
     console.log('cjs test successful');
 } catch (e) {
     console.log(e);

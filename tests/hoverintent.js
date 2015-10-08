@@ -1,1 +1,1 @@
-../dist/hoverintent.js
+../dist/hoverIntent.js

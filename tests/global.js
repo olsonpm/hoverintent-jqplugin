@@ -1,11 +1,11 @@
 'use strict';
 
-phantom.injectJs('../node_modules/jquery/dist/jquery.js');
+phantom.injectJs('./jquery.js');
 var assert = require('chai').assert;
 
 try {
-    require('../dist/hoverintent.js')(window);
-    assert.ok(window.jQuery.fn.hoverintent);
+    require('./hoverIntent.js')(window);
+    assert.ok(window.jQuery.fn.hoverIntent);
     console.log('global test successful');
 } catch (e) {
     console.log(e);

@@ -37,4 +37,13 @@ npm install
 npm test
 ```
 
+#Run CJS example
+```
+npm install
+gulp run-cjs-example
+// now open up chrome and visit http://localhost:8080/ to view the example
+```
+
+I can add more examples if people want them.
+
 A minified version is also available in the /dist directory.
